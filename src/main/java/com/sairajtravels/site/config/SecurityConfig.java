@@ -49,8 +49,6 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Allow all requests for testing
-                .anyRequest().permitAll()
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/contact/**").permitAll()
@@ -64,25 +62,17 @@ public class SecurityConfig {
                 .requestMatchers("/").permitAll()
                 .requestMatchers("/health").permitAll()
                 .requestMatchers("/test").permitAll()
+                .requestMatchers("/api/cors-test/**").permitAll()
                 
                 // Static resources
                 .requestMatchers("/images/**").permitAll()
                 .requestMatchers("/static/**").permitAll()
                 
-                // Admin endpoints require authentication
-                .requestMatchers("/api/admin/**").authenticated()
-                .requestMatchers("/api/vehicles/**").authenticated()
-                .requestMatchers("/api/drivers/**").authenticated()
-                .requestMatchers("/api/bookings/**").authenticated()
-                .requestMatchers("/api/packages/**").authenticated()
-                .requestMatchers("/api/gallery/**").authenticated()
-                .requestMatchers("/api/testimonials/**").authenticated()
-                .requestMatchers("/api/routes/**").authenticated()
-                .requestMatchers("/api/users/**").authenticated()
-                .requestMatchers("/api/roles/**").authenticated()
+                // Allow all API endpoints for CORS testing
+                .requestMatchers("/api/**").permitAll()
                 
-                // All other requests require authentication
-                .anyRequest().authenticated()
+                // Allow all other requests for testing
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
