@@ -103,6 +103,11 @@ public class EmailTestController {
             System.out.println("Timestamp: " + java.time.LocalDateTime.now());
             System.out.println("From Address: " + fromAddress);
             System.out.println("Email Service Enabled: " + emailService.isEmailEnabled());
+            System.out.println("Environment Variables:");
+            System.out.println("  EMAIL_HOST: " + System.getenv("EMAIL_HOST"));
+            System.out.println("  EMAIL_PORT: " + System.getenv("EMAIL_PORT"));
+            System.out.println("  SENDGRID_USERNAME: " + System.getenv("SENDGRID_USERNAME"));
+            System.out.println("  SENDGRID_API_KEY length: " + (System.getenv("SENDGRID_API_KEY") != null ? System.getenv("SENDGRID_API_KEY").length() : "null"));
             
             // Test hardcoded contact form email
             String customerEmail = "pavansmurkute@gmail.com";
