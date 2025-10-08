@@ -24,6 +24,10 @@ public class EmailService {
     @Value("${app.email.enabled:true}")
     private boolean emailEnabled;
     
+    public boolean isEmailEnabled() {
+        return emailEnabled;
+    }
+    
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
     

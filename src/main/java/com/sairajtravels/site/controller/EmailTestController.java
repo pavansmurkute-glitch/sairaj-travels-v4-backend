@@ -55,13 +55,44 @@ public class EmailTestController {
     @GetMapping("/email-config")
     public ResponseEntity<String> getEmailConfig() {
         try {
-            return ResponseEntity.ok("Email Configuration:\n" +
+            return ResponseEntity.ok("📧 SendGrid Email Configuration:\n" +
                 "From: " + fromAddress + "\n" +
-                "Host: smtp.gmail.com\n" +
-                "Port: 587\n" +
+                "Host: " + System.getenv("EMAIL_HOST") + "\n" +
+                "Port: " + System.getenv("EMAIL_PORT") + "\n" +
+                "Username: " + System.getenv("SENDGRID_USERNAME") + "\n" +
+                "SendGrid API Key Set: " + (System.getenv("SENDGRID_API_KEY") != null && !System.getenv("SENDGRID_API_KEY").isEmpty()) + "\n" +
+                "Email Enabled: " + emailService.isEmailEnabled() + "\n" +
                 "Time: " + java.time.LocalDateTime.now());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error getting config: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/test-sendgrid")
+    public ResponseEntity<String> testSendGrid() {
+        try {
+            String testSubject = "SendGrid Test Email from Sairaj Travels";
+            String testHtml = """
+                <html>
+                <body style="font-family: Arial, sans-serif;">
+                    <h2 style="color: #2563eb;">🎉 SendGrid Test Email</h2>
+                    <p>This is a test email sent via SendGrid from Sairaj Travels backend.</p>
+                    <p>If you receive this email, SendGrid configuration is working correctly!</p>
+                    <p><strong>From:</strong> %s</p>
+                    <p><strong>Time:</strong> %s</p>
+                    <hr>
+                    <p style="color: #666; font-size: 12px;">This is an automated test email.</p>
+                </body>
+                </html>
+                """.formatted(fromAddress, java.time.LocalDateTime.now());
+            
+            String testText = "SendGrid Test Email from Sairaj Travels\n\nThis is a test email sent via SendGrid.\n\nFrom: " + fromAddress + "\nTime: " + java.time.LocalDateTime.now();
+            
+            emailService.sendHtmlEmail(fromAddress, testSubject, testHtml, testText);
+            
+            return ResponseEntity.ok("✅ SendGrid test email sent to: " + fromAddress + " at " + java.time.LocalDateTime.now());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("❌ SendGrid test failed: " + e.getMessage());
         }
     }
 }
