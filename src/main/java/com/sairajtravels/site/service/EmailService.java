@@ -21,11 +21,19 @@ public class EmailService {
     @Value("${spring.mail.username:admin@sairajtravels.com}")
     private String fromEmail;
     
+    @Value("${app.email.enabled:true}")
+    private boolean emailEnabled;
+    
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
     
     @Async
     public CompletableFuture<Void> sendTemporaryPassword(String toEmail, String fullName, String username, String tempPassword) {
+        if (!emailEnabled) {
+            System.out.println("📧 Email service disabled - temporary password for " + username + ": " + tempPassword);
+            return CompletableFuture.completedFuture(null);
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -49,6 +57,11 @@ public class EmailService {
     
     @Async
     public CompletableFuture<Void> sendPasswordResetEmail(String toEmail, String fullName, String resetToken) {
+        if (!emailEnabled) {
+            System.out.println("📧 Email service disabled - password reset token for " + fullName + ": " + resetToken);
+            return CompletableFuture.completedFuture(null);
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -223,6 +236,11 @@ public class EmailService {
     // Backward compatibility methods for existing services
     
     public void sendHtmlEmail(String toEmail, String subject, String htmlContent, String fallbackText) {
+        if (!emailEnabled) {
+            System.out.println("📧 Email service disabled - would send to: " + toEmail + " | Subject: " + subject);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -243,6 +261,11 @@ public class EmailService {
     }
     
     public void notifyAdmin(String subject, String message, String fromEmail) {
+        if (!emailEnabled) {
+            System.out.println("📧 Email service disabled - admin notification: " + subject);
+            return;
+        }
+        
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setFrom(this.fromEmail);
