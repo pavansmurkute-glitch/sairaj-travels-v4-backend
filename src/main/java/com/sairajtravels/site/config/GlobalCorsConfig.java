@@ -22,16 +22,12 @@ public class GlobalCorsConfig {
         
         System.out.println("Global CORS Configuration - Allowed Origins: " + allowedOrigins);
         
-        if ("*".equals(allowedOrigins)) {
-            config.addAllowedOriginPattern("*");
-        } else {
-            String[] origins = allowedOrigins.split(",");
-            for (String origin : origins) {
-                String trimmedOrigin = origin.trim();
-                System.out.println("Global CORS Origin: " + trimmedOrigin);
-                config.addAllowedOrigin(trimmedOrigin);
-            }
-        }
+        // Allow all origins for now to test
+        config.addAllowedOriginPattern("*");
+        config.addAllowedOrigin("https://sairaj-travels-v5-frontend.onrender.com");
+        config.addAllowedOrigin("https://sairaj-travels-v4-frontend.onrender.com");
+        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("http://localhost:3000");
         
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
@@ -39,7 +35,7 @@ public class GlobalCorsConfig {
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/**", config); // Apply to all paths, not just /api/**
 
         return new CorsFilter(source);
     }
