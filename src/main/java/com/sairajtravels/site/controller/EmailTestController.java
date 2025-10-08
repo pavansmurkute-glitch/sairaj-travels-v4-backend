@@ -95,4 +95,69 @@ public class EmailTestController {
             return ResponseEntity.status(500).body("❌ SendGrid test failed: " + e.getMessage());
         }
     }
+    
+    @GetMapping("/test-hardcoded-email")
+    public ResponseEntity<String> testHardcodedEmail() {
+        try {
+            System.out.println("=== HARDCODED EMAIL TEST STARTED ===");
+            System.out.println("Timestamp: " + java.time.LocalDateTime.now());
+            System.out.println("From Address: " + fromAddress);
+            System.out.println("Email Service Enabled: " + emailService.isEmailEnabled());
+            
+            // Test hardcoded contact form email
+            String customerEmail = "pavansmurkute@gmail.com";
+            String customerSubject = "Test Contact Form - Sairaj Travels";
+            String customerHtml = """
+                <html>
+                <body style="font-family: Arial, sans-serif;">
+                    <h2 style="color: #2563eb;">Thank you for contacting Sairaj Travels!</h2>
+                    <p>We have received your message and will get back to you soon.</p>
+                    <p><strong>Your Message:</strong> This is a hardcoded test message</p>
+                    <p><strong>Time:</strong> %s</p>
+                    <hr>
+                    <p style="color: #666; font-size: 12px;">This is an automated response from Sairaj Travels.</p>
+                </body>
+                </html>
+                """.formatted(java.time.LocalDateTime.now());
+            
+            String customerText = "Thank you for contacting Sairaj Travels!\n\nWe have received your message and will get back to you soon.\n\nYour Message: This is a hardcoded test message\nTime: " + java.time.LocalDateTime.now();
+            
+            System.out.println("Attempting to send customer email to: " + customerEmail);
+            emailService.sendHtmlEmail(customerEmail, customerSubject, customerHtml, customerText);
+            System.out.println("✅ Customer email sent successfully");
+            
+            // Test admin notification
+            String adminSubject = "Test Admin Notification - Contact Form";
+            String adminHtml = """
+                <html>
+                <body style="font-family: Arial, sans-serif;">
+                    <h2 style="color: #dc2626;">New Contact Message - Test</h2>
+                    <p><strong>From:</strong> Test User</p>
+                    <p><strong>Email:</strong> pavansmurkute@gmail.com</p>
+                    <p><strong>Phone:</strong> +919921793267</p>
+                    <p><strong>Message:</strong> This is a hardcoded test message</p>
+                    <p><strong>Time:</strong> %s</p>
+                </body>
+                </html>
+                """.formatted(java.time.LocalDateTime.now());
+            
+            String adminText = "New Contact Message - Test\n\nFrom: Test User\nEmail: pavansmurkute@gmail.com\nPhone: +919921793267\nMessage: This is a hardcoded test message\nTime: " + java.time.LocalDateTime.now();
+            
+            System.out.println("Attempting to send admin notification to: " + fromAddress);
+            emailService.notifyAdmin(adminSubject, adminHtml, adminText);
+            System.out.println("✅ Admin notification sent successfully");
+            
+            System.out.println("=== HARDCODED EMAIL TEST COMPLETED ===");
+            
+            return ResponseEntity.ok("✅ Hardcoded email test completed! Check server logs for details. Emails sent to: " + customerEmail + " and " + fromAddress);
+            
+        } catch (Exception e) {
+            System.err.println("=== HARDCODED EMAIL TEST FAILED ===");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("=== END ERROR LOG ===");
+            
+            return ResponseEntity.status(500).body("❌ Hardcoded email test failed: " + e.getMessage() + "\n\nFull error details logged to server console.");
+        }
+    }
 }
