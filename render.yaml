@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sairaj-travels-v4-backend
+    name: sairaj-travels-v5-backend
     env: docker
     region: singapore
     plan: free
@@ -11,7 +11,7 @@ services:
     healthCheckPath: /actuator/health
     envVars:
       - key: APP_FRONTEND_URL
-        value: https://sairaj-travels-v4-frontend.onrender.com
+        value: https://sairaj-travels-v5-frontend.onrender.com
       - key: LOGGING_LEVEL_COM_SAIRAJTRAVELS_SITE
         value: INFO
       - key: LOGGING_LEVEL_ORG_HIBERNATE_SQL
