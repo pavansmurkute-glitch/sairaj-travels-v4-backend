@@ -159,7 +159,7 @@ public class EmailTestController {
             
             // Send email using custom configuration
             jakarta.mail.internet.MimeMessage message = customMailSender.createMimeMessage();
-            jakarta.mail.internet.MimeMessageHelper helper = new jakarta.mail.internet.MimeMessageHelper(message, true);
+            org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(message, true);
             helper.setFrom(hardcodedFromEmail);
             helper.setTo(customerEmail);
             helper.setSubject(customerSubject);
@@ -190,7 +190,7 @@ public class EmailTestController {
             
             // Send admin notification using custom configuration
             jakarta.mail.internet.MimeMessage adminMessage = customMailSender.createMimeMessage();
-            jakarta.mail.internet.MimeMessageHelper adminHelper = new jakarta.mail.internet.MimeMessageHelper(adminMessage, true);
+            org.springframework.mail.javamail.MimeMessageHelper adminHelper = new org.springframework.mail.javamail.MimeMessageHelper(adminMessage, true);
             adminHelper.setFrom(hardcodedFromEmail);
             adminHelper.setTo(hardcodedFromEmail);
             adminHelper.setSubject("Admin Notification: " + adminSubject);
