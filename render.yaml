@@ -38,10 +38,6 @@ services:
         value: 1200000
       - key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
         value: 1
-      - key: SPRING_DATASOURCE_HIKARI_CONNECTION_TEST_QUERY
-        value: SELECT 1
-      - key: SPRING_DATASOURCE_HIKARI_VALIDATION_TIMEOUT
-        value: 5000
       - key: SPRING_DATASOURCE_PASSWORD
         value: Deep@6044
       - key: SPRING_DATASOURCE_URL
