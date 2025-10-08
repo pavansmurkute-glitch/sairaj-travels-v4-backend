@@ -1,0 +1,88 @@
+services:
+  # -------------------------
+  # Backend Service (Spring Boot)
+  # -------------------------
+  - type: web
+    name: sairaj-travels-backend
+    env: java
+    region: singapore
+    plan: free
+    repo: https://github.com/pavansmurkute-glitch/sairaj-travels-v4-backend
+    branch: main
+    rootDir: .
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/sairaj-travels-backend-0.0.1-SNAPSHOT.jar
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:sqlserver://sairaj-sqlserver.database.windows.net:1433;database=SairajTravelsDB;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+      - key: SPRING_DATASOURCE_USERNAME
+        value: sairajadmin@sairaj-sqlserver
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: none
+      - key: SPRING_JPA_SHOW_SQL
+        value: false
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        value: org.hibernate.dialect.SQLServerDialect
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_HBM2DDL_AUTO
+        value: none
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS
+        value: false
+      - key: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
+        value: 30000
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: 5
+      - key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+        value: 1
+      - key: SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT
+        value: 300000
+      - key: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
+        value: 1200000
+      - key: SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD
+        value: 60000
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        value: org.hibernate.dialect.SQLServerDialect
+      - key: SERVER_PORT
+        value: 10000
+      # Email Configuration (Gmail with extended timeouts)
+      - key: SPRING_MAIL_HOST
+        value: smtp.gmail.com
+      - key: SPRING_MAIL_PORT
+        value: 587
+      - key: SPRING_MAIL_USERNAME
+        value: PavansMurkute@gmail.com
+      - key: SPRING_MAIL_PASSWORD
+        sync: false
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+        value: true
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+        value: true
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTION_TIMEOUT
+        value: 5000
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT
+        value: 3000
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITE_TIMEOUT
+        value: 5000
+
+  # -------------------------
+  # Frontend Service (React + Vite)
+  # -------------------------
+  - type: web
+    name: sairaj-travels-frontend
+    env: static
+    region: singapore
+    plan: free
+    repo: https://github.com/pavansmurkute-glitch/sairaj-travels-v4-backend
+    branch: main
+    rootDir: .
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://sairaj-travels-backend.onrender.com
