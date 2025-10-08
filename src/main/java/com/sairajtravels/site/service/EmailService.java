@@ -264,34 +264,27 @@ public class EmailService {
         }
     }
     
-    public void notifyAdmin(String subject, String message, String fromEmail) {
+    public void notifyAdmin(String subject, String htmlContent, String fallbackText) {
         if (!emailEnabled) {
             System.out.println("📧 Email service disabled - admin notification: " + subject);
             return;
         }
         
         try {
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setFrom(this.fromEmail);
-            mailMessage.setTo(this.fromEmail); // Send to admin email
-            mailMessage.setSubject("Admin Notification: " + subject);
-            mailMessage.setText(String.format("""
-                Admin Notification
-                
-                Subject: %s
-                From: %s
-                
-                Message:
-                %s
-                
-                ---
-                This is an automated notification from Sairaj Travels system.
-                """, subject, fromEmail, message));
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
-            mailSender.send(mailMessage);
+            helper.setFrom(fromEmail);
+            helper.setTo(fromEmail); // Send to admin email
+            helper.setSubject("Admin Notification: " + subject);
+            helper.setText(fallbackText, htmlContent);
+            
+            mailSender.send(message);
+            System.out.println("✅ Admin notification sent successfully");
         } catch (Exception e) {
             // Don't throw exception for admin notifications to avoid breaking business logic
             System.err.println("Failed to send admin notification: " + e.getMessage());
+            System.err.println("Failed messages: " + e.getMessage());
         }
     }
 }

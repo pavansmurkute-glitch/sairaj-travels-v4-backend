@@ -50,24 +50,28 @@ services:
         value: org.hibernate.dialect.SQLServerDialect
       - key: SPRING_JPA_SHOW_SQL
         value: false
-      - key: SPRING_MAIL_HOST
-        value: smtp.gmail.com
-      - key: SPRING_MAIL_PASSWORD
-        value: clkw llov wwxh xhcg
-      - key: SPRING_MAIL_PORT
+      - key: EMAIL_HOST
+        value: smtp.sendgrid.net
+      - key: EMAIL_PORT
         value: 587
+      - key: SENDGRID_USERNAME
+        value: apikey
+      - key: SENDGRID_API_KEY
+        value: YOUR_SENDGRID_API_KEY_HERE
       - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
         value: true
       - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTION_TIMEOUT
-        value: 5000
+        value: 30000
       - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
         value: true
       - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT
-        value: 3000
+        value: 30000
       - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITE_TIMEOUT
-        value: 5000
+        value: 30000
       - key: SPRING_MAIL_USERNAME
         value: PavansMurkute@gmail.com
+      - key: EMAIL_SERVICE_ENABLED
+        value: true
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: SPRING_SERVLET_MULTIPART_ENABLED

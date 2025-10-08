@@ -99,62 +99,116 @@ public class EmailTestController {
     @GetMapping("/test-hardcoded-email")
     public ResponseEntity<String> testHardcodedEmail() {
         try {
-            System.out.println("=== HARDCODED EMAIL TEST STARTED ===");
+            System.out.println("=== HARDCODED EMAIL TEST WITH DIRECT CONFIGURATION ===");
             System.out.println("Timestamp: " + java.time.LocalDateTime.now());
-            System.out.println("From Address: " + fromAddress);
-            System.out.println("Email Service Enabled: " + emailService.isEmailEnabled());
-            System.out.println("Environment Variables:");
-            System.out.println("  EMAIL_HOST: " + System.getenv("EMAIL_HOST"));
-            System.out.println("  EMAIL_PORT: " + System.getenv("EMAIL_PORT"));
-            System.out.println("  SENDGRID_USERNAME: " + System.getenv("SENDGRID_USERNAME"));
-            System.out.println("  SENDGRID_API_KEY length: " + (System.getenv("SENDGRID_API_KEY") != null ? System.getenv("SENDGRID_API_KEY").length() : "null"));
+            
+            // Hardcoded SendGrid configuration for testing
+            String hardcodedHost = "smtp.sendgrid.net";
+            String hardcodedPort = "2525"; // Using port 2525 as requested
+            String hardcodedUsername = "apikey";
+            String hardcodedPassword = System.getenv("SENDGRID_API_KEY"); // Get from environment
+            String hardcodedFromEmail = "PavansMurkute@gmail.com";
+            
+            System.out.println("Hardcoded Configuration:");
+            System.out.println("  Host: " + hardcodedHost);
+            System.out.println("  Port: " + hardcodedPort);
+            System.out.println("  Username: " + hardcodedUsername);
+            System.out.println("  Password length: " + (hardcodedPassword != null ? hardcodedPassword.length() : "null"));
+            System.out.println("  From Email: " + hardcodedFromEmail);
+            
+            // Create custom JavaMailSender with hardcoded settings
+            org.springframework.mail.javamail.JavaMailSenderImpl customMailSender = new org.springframework.mail.javamail.JavaMailSenderImpl();
+            customMailSender.setHost(hardcodedHost);
+            customMailSender.setPort(Integer.parseInt(hardcodedPort));
+            customMailSender.setUsername(hardcodedUsername);
+            customMailSender.setPassword(hardcodedPassword);
+            
+            // Set SMTP properties
+            java.util.Properties props = customMailSender.getJavaMailProperties();
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.ssl.trust", hardcodedHost);
+            props.put("mail.smtp.connectiontimeout", "30000");
+            props.put("mail.smtp.timeout", "30000");
+            props.put("mail.smtp.writetimeout", "30000");
+            props.put("mail.debug", "true"); // Enable debug for troubleshooting
             
             // Test hardcoded contact form email
             String customerEmail = "pavansmurkute@gmail.com";
-            String customerSubject = "Test Contact Form - Sairaj Travels";
+            String customerSubject = "Test Contact Form - Sairaj Travels (Hardcoded Config)";
             String customerHtml = """
                 <html>
                 <body style="font-family: Arial, sans-serif;">
                     <h2 style="color: #2563eb;">Thank you for contacting Sairaj Travels!</h2>
                     <p>We have received your message and will get back to you soon.</p>
-                    <p><strong>Your Message:</strong> This is a hardcoded test message</p>
+                    <p><strong>Your Message:</strong> This is a hardcoded test message with direct SendGrid configuration</p>
                     <p><strong>Time:</strong> %s</p>
+                    <p><strong>Configuration:</strong> Host=%s, Port=%s</p>
                     <hr>
                     <p style="color: #666; font-size: 12px;">This is an automated response from Sairaj Travels.</p>
                 </body>
                 </html>
-                """.formatted(java.time.LocalDateTime.now());
+                """.formatted(java.time.LocalDateTime.now(), hardcodedHost, hardcodedPort);
             
-            String customerText = "Thank you for contacting Sairaj Travels!\n\nWe have received your message and will get back to you soon.\n\nYour Message: This is a hardcoded test message\nTime: " + java.time.LocalDateTime.now();
+            String customerText = "Thank you for contacting Sairaj Travels!\n\nWe have received your message and will get back to you soon.\n\nYour Message: This is a hardcoded test message with direct SendGrid configuration\nTime: " + java.time.LocalDateTime.now() + "\nConfig: Host=" + hardcodedHost + ", Port=" + hardcodedPort;
             
             System.out.println("Attempting to send customer email to: " + customerEmail);
-            emailService.sendHtmlEmail(customerEmail, customerSubject, customerHtml, customerText);
-            System.out.println("✅ Customer email sent successfully");
+            System.out.println("Using hardcoded SendGrid configuration...");
+            
+            // Send email using custom configuration
+            jakarta.mail.internet.MimeMessage message = customMailSender.createMimeMessage();
+            jakarta.mail.internet.MimeMessageHelper helper = new jakarta.mail.internet.MimeMessageHelper(message, true);
+            helper.setFrom(hardcodedFromEmail);
+            helper.setTo(customerEmail);
+            helper.setSubject(customerSubject);
+            helper.setText(customerText, customerHtml);
+            
+            customMailSender.send(message);
+            System.out.println("✅ Customer email sent successfully with hardcoded config");
             
             // Test admin notification
-            String adminSubject = "Test Admin Notification - Contact Form";
+            String adminSubject = "Test Admin Notification - Contact Form (Hardcoded)";
             String adminHtml = """
                 <html>
                 <body style="font-family: Arial, sans-serif;">
-                    <h2 style="color: #dc2626;">New Contact Message - Test</h2>
+                    <h2 style="color: #dc2626;">New Contact Message - Test (Hardcoded Config)</h2>
                     <p><strong>From:</strong> Test User</p>
                     <p><strong>Email:</strong> pavansmurkute@gmail.com</p>
                     <p><strong>Phone:</strong> +919921793267</p>
                     <p><strong>Message:</strong> This is a hardcoded test message</p>
                     <p><strong>Time:</strong> %s</p>
+                    <p><strong>Config Used:</strong> Host=%s, Port=%s</p>
                 </body>
                 </html>
-                """.formatted(java.time.LocalDateTime.now());
+                """.formatted(java.time.LocalDateTime.now(), hardcodedHost, hardcodedPort);
             
-            String adminText = "New Contact Message - Test\n\nFrom: Test User\nEmail: pavansmurkute@gmail.com\nPhone: +919921793267\nMessage: This is a hardcoded test message\nTime: " + java.time.LocalDateTime.now();
+            String adminText = "New Contact Message - Test (Hardcoded Config)\n\nFrom: Test User\nEmail: pavansmurkute@gmail.com\nPhone: +919921793267\nMessage: This is a hardcoded test message\nTime: " + java.time.LocalDateTime.now() + "\nConfig: Host=" + hardcodedHost + ", Port=" + hardcodedPort;
             
-            System.out.println("Attempting to send admin notification to: " + fromAddress);
-            emailService.notifyAdmin(adminSubject, adminHtml, adminText);
-            System.out.println("✅ Admin notification sent successfully");
+            System.out.println("Attempting to send admin notification to: " + hardcodedFromEmail);
+            
+            // Send admin notification using custom configuration
+            jakarta.mail.internet.MimeMessage adminMessage = customMailSender.createMimeMessage();
+            jakarta.mail.internet.MimeMessageHelper adminHelper = new jakarta.mail.internet.MimeMessageHelper(adminMessage, true);
+            adminHelper.setFrom(hardcodedFromEmail);
+            adminHelper.setTo(hardcodedFromEmail);
+            adminHelper.setSubject("Admin Notification: " + adminSubject);
+            adminHelper.setText(adminText, adminHtml);
+            
+            customMailSender.send(adminMessage);
+            System.out.println("✅ Admin notification sent successfully with hardcoded config");
             
             System.out.println("=== HARDCODED EMAIL TEST COMPLETED ===");
             
-            return ResponseEntity.ok("✅ Hardcoded email test completed! Check server logs for details. Emails sent to: " + customerEmail + " and " + fromAddress);
+            return ResponseEntity.ok("✅ Hardcoded email test completed with direct SendGrid configuration!\n" +
+                "Configuration used:\n" +
+                "- Host: " + hardcodedHost + "\n" +
+                "- Port: " + hardcodedPort + "\n" +
+                "- Username: " + hardcodedUsername + "\n" +
+                "- From: " + hardcodedFromEmail + "\n" +
+                "Emails sent to: " + customerEmail + " and " + hardcodedFromEmail + "\n" +
+                "Check server logs for detailed debug information.");
             
         } catch (Exception e) {
             System.err.println("=== HARDCODED EMAIL TEST FAILED ===");
@@ -162,7 +216,12 @@ public class EmailTestController {
             e.printStackTrace();
             System.err.println("=== END ERROR LOG ===");
             
-            return ResponseEntity.status(500).body("❌ Hardcoded email test failed: " + e.getMessage() + "\n\nFull error details logged to server console.");
+            return ResponseEntity.status(500).body("❌ Hardcoded email test failed: " + e.getMessage() + 
+                "\n\nConfiguration attempted:\n" +
+                "- Host: smtp.sendgrid.net\n" +
+                "- Port: 2525\n" +
+                "- Username: apikey\n" +
+                "\nFull error details logged to server console.");
         }
     }
 }
