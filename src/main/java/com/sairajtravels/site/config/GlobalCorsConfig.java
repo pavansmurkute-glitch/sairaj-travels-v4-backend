@@ -31,7 +31,8 @@ public class GlobalCorsConfig {
         
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
-        config.setAllowCredentials(true);
+        // Removed allowCredentials to fix CORS error with wildcard origins
+        // config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
