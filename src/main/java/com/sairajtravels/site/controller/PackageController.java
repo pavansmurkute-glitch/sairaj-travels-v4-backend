@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/packages")
+@CrossOrigin(origins = "*")
 public class PackageController {
 
     @Autowired

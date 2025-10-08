@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/enquiries")
+@CrossOrigin(origins = "*")
 public class EnquiryController {
 
     private final EnquiryService enquiryService;
