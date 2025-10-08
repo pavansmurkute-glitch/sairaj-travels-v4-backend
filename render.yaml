@@ -45,7 +45,7 @@ services:
       - key: SPRING_DATASOURCE_PASSWORD
         value: Deep@6044
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:sqlserver://sairaj-sqlserver.database.windows.net:1433;databaseName=SairajTravelsDB;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;connectRetryCount=3;connectRetryInterval=10;
+        value: jdbc:sqlserver://sairaj-sqlserver.database.windows.net:1433;databaseName=SairajTravelsDB;encrypt=true;trustServerCertificate=true;loginTimeout=30;connectRetryCount=3;connectRetryInterval=10;sslProtocol=TLSv1.2;sendStringParametersAsUnicode=false;
       - key: SPRING_DATASOURCE_USERNAME
         value: sairajadmin@sairaj-sqlserver
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
@@ -82,3 +82,5 @@ services:
         value: 500MB
       - key: TOLLGURU_API_KEY
         value: tg_15560DC30580420189D1616DB82DFA34
+      - key: JAVA_OPTS
+        value: -Djavax.net.ssl.trustStoreType=JKS -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Dcom.microsoft.sqlserver.jdbc.SSLProtocol=TLSv1.2
