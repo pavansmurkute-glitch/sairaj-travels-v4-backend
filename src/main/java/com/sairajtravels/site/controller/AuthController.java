@@ -13,7 +13,6 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,12 +91,7 @@ public class AuthController {
             // Create password reset token and send email
             String token = userManagementService.createPasswordResetToken(email);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Access-Control-Allow-Origin", "*");
-            headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            headers.add("Access-Control-Allow-Headers", "*");
-            
-            return ResponseEntity.ok().headers(headers).body(createSuccessResponse(
+            return ResponseEntity.ok(createSuccessResponse(
                 "Password reset link has been sent to your email address. Please check your inbox."
             ));
         } catch (Exception e) {

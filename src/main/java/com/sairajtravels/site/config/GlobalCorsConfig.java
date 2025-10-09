@@ -22,8 +22,7 @@ public class GlobalCorsConfig {
         
         System.out.println("Global CORS Configuration - Allowed Origins: " + allowedOrigins);
         
-        // Allow all origins for now to test
-        config.addAllowedOriginPattern("*");
+        // Allow specific origins
         config.addAllowedOrigin("https://sairaj-travels-v5-frontend.onrender.com");
         config.addAllowedOrigin("https://sairaj-travels-v4-frontend.onrender.com");
         config.addAllowedOrigin("http://localhost:5173");
