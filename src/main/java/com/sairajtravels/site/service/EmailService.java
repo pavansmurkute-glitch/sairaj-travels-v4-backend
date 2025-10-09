@@ -1,5 +1,6 @@
 package com.sairajtravels.site.service;
 
+import com.sairajtravels.site.entity.EmailSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,14 +19,35 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
     
+    @Autowired
+    private EmailSettingsService emailSettingsService;
+    
     @Value("${spring.mail.username:admin@sairajtravels.com}")
-    private String fromEmail;
+    private String defaultFromEmail;
     
     @Value("${app.email.enabled:true}")
-    private boolean emailEnabled;
+    private boolean defaultEmailEnabled;
     
     public boolean isEmailEnabled() {
-        return emailEnabled;
+        try {
+            return emailSettingsService.isEmailEnabled();
+        } catch (Exception e) {
+            System.err.println("Error checking email settings from database, using default: " + e.getMessage());
+            return defaultEmailEnabled;
+        }
+    }
+    
+    /**
+     * Get the from email address from database settings or use default
+     */
+    private String getFromEmail() {
+        try {
+            EmailSettings settings = emailSettingsService.getEmailConfiguration();
+            return settings.getFromEmail() != null ? settings.getFromEmail() : defaultFromEmail;
+        } catch (Exception e) {
+            System.err.println("Error getting from email from database, using default: " + e.getMessage());
+            return defaultFromEmail;
+        }
     }
     
     @Value("${app.frontend.url:http://localhost:5173}")
@@ -33,7 +55,7 @@ public class EmailService {
     
     @Async
     public CompletableFuture<Void> sendTemporaryPassword(String toEmail, String fullName, String username, String tempPassword) {
-        if (!emailEnabled) {
+        if (!isEmailEnabled()) {
             System.out.println("📧 Email service disabled - temporary password for " + username + ": " + tempPassword);
             return CompletableFuture.completedFuture(null);
         }
@@ -42,7 +64,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
-            helper.setFrom(fromEmail);
+            helper.setFrom(getFromEmail());
             helper.setTo(toEmail);
             helper.setSubject("Welcome to Sairaj Travels Admin Panel - Temporary Password");
             
@@ -61,7 +83,7 @@ public class EmailService {
     
     @Async
     public CompletableFuture<Void> sendPasswordResetEmail(String toEmail, String fullName, String resetToken) {
-        if (!emailEnabled) {
+        if (!isEmailEnabled()) {
             System.out.println("📧 Email service disabled - password reset token for " + fullName + ": " + resetToken);
             return CompletableFuture.completedFuture(null);
         }
@@ -70,7 +92,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
-            helper.setFrom(fromEmail);
+            helper.setFrom(getFromEmail());
             helper.setTo(toEmail);
             helper.setSubject("Sairaj Travels Admin - Password Reset Request");
             
@@ -92,7 +114,7 @@ public class EmailService {
     public void sendPasswordChangeNotification(String toEmail, String fullName) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
+            message.setFrom(getFromEmail());
             message.setTo(toEmail);
             message.setSubject("Sairaj Travels Admin - Password Changed Successfully");
             message.setText(buildPasswordChangeNotification(fullName));
@@ -240,7 +262,7 @@ public class EmailService {
     // Backward compatibility methods for existing services
     
     public void sendHtmlEmail(String toEmail, String subject, String htmlContent, String fallbackText) {
-        if (!emailEnabled) {
+        if (!isEmailEnabled()) {
             System.out.println("📧 Email service disabled - would send to: " + toEmail + " | Subject: " + subject);
             return;
         }
@@ -249,7 +271,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
-            helper.setFrom(fromEmail);
+            helper.setFrom(getFromEmail());
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(fallbackText, htmlContent);
@@ -265,7 +287,7 @@ public class EmailService {
     }
     
     public void notifyAdmin(String subject, String htmlContent, String fallbackText) {
-        if (!emailEnabled) {
+        if (!isEmailEnabled()) {
             System.out.println("📧 Email service disabled - admin notification: " + subject);
             return;
         }
@@ -274,7 +296,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
-            helper.setFrom(fromEmail);
+            helper.setFrom(getFromEmail());
             helper.setTo(fromEmail); // Send to admin email
             helper.setSubject("Admin Notification: " + subject);
             helper.setText(fallbackText, htmlContent);
