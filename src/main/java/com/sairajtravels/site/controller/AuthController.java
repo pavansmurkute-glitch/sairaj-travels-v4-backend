@@ -13,13 +13,14 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "${app.cors.allowed-origins:*}")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
     @Autowired
@@ -80,7 +81,7 @@ public class AuthController {
         return ResponseEntity.ok(createSuccessResponse("Logout successful"));
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping(value = "/forgot-password", produces = "application/json")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         try {
             String email = request.get("email");
@@ -91,7 +92,12 @@ public class AuthController {
             // Create password reset token and send email
             String token = userManagementService.createPasswordResetToken(email);
             
-            return ResponseEntity.ok(createSuccessResponse(
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Access-Control-Allow-Origin", "*");
+            headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            headers.add("Access-Control-Allow-Headers", "*");
+            
+            return ResponseEntity.ok().headers(headers).body(createSuccessResponse(
                 "Password reset link has been sent to your email address. Please check your inbox."
             ));
         } catch (Exception e) {
