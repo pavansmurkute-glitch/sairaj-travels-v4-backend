@@ -61,12 +61,13 @@ public class EmailSettingsController {
      */
     @PostMapping("/toggle")
     public ResponseEntity<Map<String, Object>> toggleEmailEnabled(
-            @RequestParam boolean enabled,
+            @RequestBody Map<String, Boolean> payload,
             Authentication authentication) {
         
         Map<String, Object> response = new HashMap<>();
         
         try {
+            Boolean enabled = payload.get("enabled");
             String updatedBy = authentication != null ? authentication.getName() : "Admin";
             EmailSettings updatedSettings = emailSettingsService.toggleEmailEnabled(enabled, updatedBy);
             
