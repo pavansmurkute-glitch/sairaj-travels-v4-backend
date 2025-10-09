@@ -189,6 +189,11 @@ public class VehicleBookingService {
 
     private void sendBookingNotifications(VehicleBookingDTO booking) {
         try {
+            System.out.println("=== SENDING BOOKING NOTIFICATIONS ===");
+            System.out.println("Booking ID: " + booking.getBookingId());
+            System.out.println("Customer: " + booking.getCustomerName());
+            System.out.println("Email: " + booking.getCustomerEmail());
+            
             // Get vehicle details
             String vehicleName = "Unknown Vehicle";
             if (booking.getVehicleId() != null) {
@@ -198,22 +203,40 @@ public class VehicleBookingService {
                 }
             }
 
-            // Send email to customer
+            // Send email to customer (don't fail if this fails)
             if (booking.getCustomerEmail() != null && !booking.getCustomerEmail().isEmpty()) {
-                String customerSubject = "Booking Confirmation - Sairaj Travels";
-                String customerHtml = buildCustomerEmailHtml(booking, vehicleName);
-                String customerText = buildCustomerEmailText(booking, vehicleName);
-                emailService.sendHtmlEmail(booking.getCustomerEmail(), customerSubject, customerHtml, customerText);
+                try {
+                    String customerSubject = "Booking Confirmation - Sairaj Travels";
+                    String customerHtml = buildCustomerEmailHtml(booking, vehicleName);
+                    String customerText = buildCustomerEmailText(booking, vehicleName);
+                    emailService.sendHtmlEmail(booking.getCustomerEmail(), customerSubject, customerHtml, customerText);
+                    System.out.println("✅ Customer email sent successfully");
+                } catch (Exception emailError) {
+                    System.err.println("⚠️ Failed to send customer email (booking still saved): " + emailError.getMessage());
+                    emailError.printStackTrace();
+                }
+            } else {
+                System.out.println("ℹ️ No customer email provided - skipping customer notification");
             }
 
-            // Send email to admin
-            String adminSubject = "New Booking Request - " + booking.getCustomerName();
-            String adminHtml = buildAdminEmailHtml(booking, vehicleName);
-            String adminText = buildAdminEmailText(booking, vehicleName);
-            emailService.notifyAdmin(adminSubject, adminHtml, adminText);
+            // Send email to admin (don't fail if this fails)
+            try {
+                String adminSubject = "New Booking Request - " + booking.getCustomerName();
+                String adminHtml = buildAdminEmailHtml(booking, vehicleName);
+                String adminText = buildAdminEmailText(booking, vehicleName);
+                emailService.notifyAdmin(adminSubject, adminHtml, adminText);
+                System.out.println("✅ Admin email sent successfully");
+            } catch (Exception adminEmailError) {
+                System.err.println("⚠️ Failed to send admin email (booking still saved): " + adminEmailError.getMessage());
+                adminEmailError.printStackTrace();
+            }
+
+            System.out.println("=== BOOKING NOTIFICATIONS COMPLETED ===");
 
         } catch (Exception e) {
-            System.err.println("Failed to send booking notifications: " + e.getMessage());
+            System.err.println("❌ Critical error in booking notifications: " + e.getMessage());
+            e.printStackTrace();
+            // Don't rethrow - booking should still be saved even if emails fail
         }
     }
 
@@ -419,21 +442,29 @@ public class VehicleBookingService {
                 }
             }
 
-            // Send email to customer about booking status change
+            // Send email to customer about booking status change (don't fail if this fails)
             if (booking.getCustomerEmail() != null && !booking.getCustomerEmail().isEmpty()) {
-                System.out.println("Sending email to: " + booking.getCustomerEmail());
-                String customerSubject = "Booking Status Update - Sairaj Travels";
-                String customerHtml = buildBookingUpdateEmailHtml(booking, vehicleName);
-                String customerText = buildBookingUpdateEmailText(booking, vehicleName);
-                emailService.sendHtmlEmail(booking.getCustomerEmail(), customerSubject, customerHtml, customerText);
-                System.out.println("Email notification triggered for booking: " + booking.getBookingId());
+                try {
+                    System.out.println("Sending email to: " + booking.getCustomerEmail());
+                    String customerSubject = "Booking Status Update - Sairaj Travels";
+                    String customerHtml = buildBookingUpdateEmailHtml(booking, vehicleName);
+                    String customerText = buildBookingUpdateEmailText(booking, vehicleName);
+                    emailService.sendHtmlEmail(booking.getCustomerEmail(), customerSubject, customerHtml, customerText);
+                    System.out.println("✅ Email notification sent for booking: " + booking.getBookingId());
+                } catch (Exception emailError) {
+                    System.err.println("⚠️ Failed to send booking update email (update still saved): " + emailError.getMessage());
+                    emailError.printStackTrace();
+                }
             } else {
-                System.out.println("No customer email found for booking: " + booking.getBookingId());
+                System.out.println("ℹ️ No customer email found for booking: " + booking.getBookingId());
             }
 
+            System.out.println("=== BOOKING UPDATE NOTIFICATION COMPLETED ===");
+
         } catch (Exception e) {
-            System.err.println("Failed to send booking update notification: " + e.getMessage());
+            System.err.println("❌ Critical error in booking update notification: " + e.getMessage());
             e.printStackTrace();
+            // Don't rethrow - booking update should still be saved even if emails fail
         }
     }
 
