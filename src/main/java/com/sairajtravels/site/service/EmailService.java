@@ -5,12 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -49,6 +51,43 @@ public class EmailService {
             return defaultFromEmail;
         }
     }
+
+    /**
+     * Create a JavaMailSender configured with database settings
+     */
+    private JavaMailSender createConfiguredMailSender() {
+        try {
+            EmailSettings settings = emailSettingsService.getEmailConfiguration();
+            
+            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            mailSender.setHost(settings.getSmtpHost());
+            mailSender.setPort(settings.getSmtpPort());
+            mailSender.setUsername(settings.getSmtpUsername());
+            mailSender.setPassword(settings.getSmtpPassword());
+            
+            Properties props = mailSender.getJavaMailProperties();
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.ssl.trust", settings.getSmtpHost());
+            props.put("mail.smtp.connectiontimeout", "30000");
+            props.put("mail.smtp.timeout", "30000");
+            props.put("mail.smtp.writetimeout", "30000");
+            props.put("mail.debug", "false"); // Set to true for debugging
+            
+            System.out.println("📧 Using database email configuration:");
+            System.out.println("  Host: " + settings.getSmtpHost());
+            System.out.println("  Port: " + settings.getSmtpPort());
+            System.out.println("  Username: " + settings.getSmtpUsername());
+            System.out.println("  From: " + settings.getFromEmail());
+            
+            return mailSender;
+        } catch (Exception e) {
+            System.err.println("Error creating configured mail sender, using default: " + e.getMessage());
+            return mailSender; // Fall back to injected mailSender
+        }
+    }
     
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
@@ -61,7 +100,8 @@ public class EmailService {
         }
         
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            JavaMailSender configuredMailSender = createConfiguredMailSender();
+            MimeMessage message = configuredMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
             helper.setFrom(getFromEmail());
@@ -71,11 +111,12 @@ public class EmailService {
             String htmlContent = buildTemporaryPasswordEmail(fullName, username, tempPassword);
             helper.setText(htmlContent, true);
             
-            mailSender.send(message);
+            configuredMailSender.send(message);
             System.out.println("✅ Temporary password email sent successfully to: " + toEmail);
         } catch (Exception e) {
             System.err.println("⚠️ Email service unavailable - temporary password for " + username + ": " + tempPassword);
             System.err.println("Email error: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for debugging
             // Don't throw exception - just log the credentials for manual sending
         }
         return CompletableFuture.completedFuture(null);
@@ -89,7 +130,8 @@ public class EmailService {
         }
         
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            JavaMailSender configuredMailSender = createConfiguredMailSender();
+            MimeMessage message = configuredMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
             helper.setFrom(getFromEmail());
@@ -100,12 +142,13 @@ public class EmailService {
             String htmlContent = buildPasswordResetEmail(fullName, resetLink);
             helper.setText(htmlContent, true);
             
-            mailSender.send(message);
+            configuredMailSender.send(message);
             System.out.println("✅ Password reset email sent successfully to: " + toEmail);
         } catch (Exception e) {
             System.err.println("⚠️ Email service unavailable - password reset token for " + fullName + ": " + resetToken);
             System.err.println("Reset link: " + frontendUrl + "/admin/reset-password?token=" + resetToken);
             System.err.println("Email error: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for debugging
             // Don't throw exception - just log the reset token for manual sending
         }
         return CompletableFuture.completedFuture(null);
@@ -268,7 +311,8 @@ public class EmailService {
         }
         
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            JavaMailSender configuredMailSender = createConfiguredMailSender();
+            MimeMessage message = configuredMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
             helper.setFrom(getFromEmail());
@@ -276,12 +320,13 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(fallbackText, htmlContent);
             
-            mailSender.send(message);
+            configuredMailSender.send(message);
             System.out.println("✅ HTML email sent successfully to: " + toEmail);
         } catch (Exception e) {
             System.err.println("⚠️ Email service unavailable - failed to send HTML email to: " + toEmail);
             System.err.println("Subject: " + subject);
             System.err.println("Email error: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for debugging
             // Don't throw exception - just log the failure
         }
     }
@@ -293,7 +338,8 @@ public class EmailService {
         }
         
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            JavaMailSender configuredMailSender = createConfiguredMailSender();
+            MimeMessage message = configuredMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
             helper.setFrom(getFromEmail());
@@ -301,12 +347,12 @@ public class EmailService {
             helper.setSubject("Admin Notification: " + subject);
             helper.setText(fallbackText, htmlContent);
             
-            mailSender.send(message);
+            configuredMailSender.send(message);
             System.out.println("✅ Admin notification sent successfully");
         } catch (Exception e) {
             // Don't throw exception for admin notifications to avoid breaking business logic
             System.err.println("Failed to send admin notification: " + e.getMessage());
-            System.err.println("Failed messages: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for debugging
         }
     }
 }
