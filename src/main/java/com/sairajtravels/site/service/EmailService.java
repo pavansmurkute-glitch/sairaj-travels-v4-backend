@@ -173,7 +173,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Sairaj Travels Admin - Password Reset Request");
             
-            String resetLink = frontendUrl + "/admin/reset-password?token=" + resetToken;
+            String resetLink = frontendUrl + "/admin-reset-password.html?token=" + resetToken;
             String htmlContent = buildPasswordResetEmail(fullName, resetLink);
             helper.setText(htmlContent, true);
             
@@ -181,7 +181,7 @@ public class EmailService {
             System.out.println("✅ Password reset email sent successfully to: " + toEmail);
         } catch (Exception e) {
             System.err.println("⚠️ Email service unavailable - password reset token for " + fullName + ": " + resetToken);
-            System.err.println("Reset link: " + frontendUrl + "/admin/reset-password?token=" + resetToken);
+            System.err.println("Reset link: " + frontendUrl + "/admin-reset-password.html?token=" + resetToken);
             System.err.println("Email error: " + e.getMessage());
             e.printStackTrace(); // Add stack trace for debugging
             // Don't throw exception - just log the reset token for manual sending
