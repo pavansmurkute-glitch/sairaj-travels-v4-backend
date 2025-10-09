@@ -191,16 +191,19 @@ public class EmailService {
     
     public void sendPasswordChangeNotification(String toEmail, String fullName) {
         try {
+            JavaMailSender configuredMailSender = createConfiguredMailSender();
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(getFromEmail());
             message.setTo(toEmail);
             message.setSubject("Sairaj Travels Admin - Password Changed Successfully");
             message.setText(buildPasswordChangeNotification(fullName));
             
-            mailSender.send(message);
+            configuredMailSender.send(message);
+            System.out.println("✅ Password change notification sent to: " + toEmail);
         } catch (Exception e) {
             // Don't throw exception for notification emails
-            System.err.println("Failed to send password change notification: " + e.getMessage());
+            System.err.println("⚠️ Failed to send password change notification: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     

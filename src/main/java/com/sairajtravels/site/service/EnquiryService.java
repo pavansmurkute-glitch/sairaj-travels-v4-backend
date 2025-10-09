@@ -142,22 +142,46 @@ public class EnquiryService {
 
     private void sendEnquiryNotifications(EnquiryDTO enquiry) {
         try {
-            // Send email to customer if email is provided
+            System.out.println("=== SENDING ENQUIRY NOTIFICATIONS ===");
+            System.out.println("Enquiry ID: " + enquiry.getEnquiryId());
+            System.out.println("Name: " + enquiry.getFullName());
+            System.out.println("Email: " + enquiry.getEmail());
+            System.out.println("Service: " + enquiry.getService());
+            
+            // Send email to customer if email is provided - don't fail if this fails
             if (enquiry.getEmail() != null && !enquiry.getEmail().isEmpty()) {
-                String customerSubject = "Enquiry Received - Sairaj Travels";
-                String customerHtml = buildCustomerEmailHtml(enquiry);
-                String customerText = buildCustomerEmailText(enquiry);
-                emailService.sendHtmlEmail(enquiry.getEmail(), customerSubject, customerHtml, customerText);
+                try {
+                    String customerSubject = "Enquiry Received - Sairaj Travels";
+                    String customerHtml = buildCustomerEmailHtml(enquiry);
+                    String customerText = buildCustomerEmailText(enquiry);
+                    emailService.sendHtmlEmail(enquiry.getEmail(), customerSubject, customerHtml, customerText);
+                    System.out.println("✅ Customer enquiry confirmation email sent successfully");
+                } catch (Exception emailError) {
+                    System.err.println("⚠️ Failed to send customer enquiry confirmation email (enquiry still saved): " + emailError.getMessage());
+                    emailError.printStackTrace();
+                }
+            } else {
+                System.out.println("ℹ️ No customer email provided - skipping customer notification");
             }
 
-            // Send email to admin
-            String adminSubject = "New Enquiry - " + enquiry.getFullName() + " (" + enquiry.getService() + ")";
-            String adminHtml = buildAdminEmailHtml(enquiry);
-            String adminText = buildAdminEmailText(enquiry);
-            emailService.notifyAdmin(adminSubject, adminHtml, adminText);
+            // Send email to admin - don't fail if this fails
+            try {
+                String adminSubject = "New Enquiry - " + enquiry.getFullName() + " (" + enquiry.getService() + ")";
+                String adminHtml = buildAdminEmailHtml(enquiry);
+                String adminText = buildAdminEmailText(enquiry);
+                emailService.notifyAdmin(adminSubject, adminHtml, adminText);
+                System.out.println("✅ Admin enquiry notification email sent successfully");
+            } catch (Exception adminEmailError) {
+                System.err.println("⚠️ Failed to send admin enquiry notification email (enquiry still saved): " + adminEmailError.getMessage());
+                adminEmailError.printStackTrace();
+            }
+
+            System.out.println("=== ENQUIRY NOTIFICATIONS COMPLETED ===");
 
         } catch (Exception e) {
-            System.err.println("Failed to send enquiry notifications: " + e.getMessage());
+            System.err.println("❌ Critical error in enquiry notifications: " + e.getMessage());
+            e.printStackTrace();
+            // Don't rethrow - enquiry should still be saved even if emails fail
         }
     }
 

@@ -19,24 +19,57 @@ public class ContactMessageService {
     }
 
     public ContactMessage saveMessage(ContactMessage message) {
-        // save to DB
+        // save to DB first
         ContactMessage saved = repository.save(message);
 
-        // 1) Client confirmation (if email provided)
-        if (saved.getEmail() != null && !saved.getEmail().isBlank()) {
-            String subject = "Sairaj Travels — We received your message";
-            String plain = buildClientText(saved);
-            String html = buildClientHtml(saved);
-            emailService.sendHtmlEmail(saved.getEmail(), subject, html, plain);
-        }
-
-        // 2) Admin notification
-        String adminSubject = "New Contact Message from " + (saved.getName() == null ? "Unknown" : saved.getName());
-        String adminPlain = buildAdminText(saved);
-        String adminHtml = buildAdminHtml(saved);
-        emailService.notifyAdmin(adminSubject, adminHtml, adminPlain);
+        // Send email notifications (non-blocking - don't fail if emails fail)
+        sendContactNotifications(saved);
 
         return saved;
+    }
+
+    private void sendContactNotifications(ContactMessage message) {
+        try {
+            System.out.println("=== SENDING CONTACT MESSAGE NOTIFICATIONS ===");
+            System.out.println("Contact ID: " + message.getId());
+            System.out.println("Name: " + message.getName());
+            System.out.println("Email: " + message.getEmail());
+            
+            // 1) Client confirmation (if email provided) - don't fail if this fails
+            if (message.getEmail() != null && !message.getEmail().isBlank()) {
+                try {
+                    String subject = "Sairaj Travels — We received your message";
+                    String plain = buildClientText(message);
+                    String html = buildClientHtml(message);
+                    emailService.sendHtmlEmail(message.getEmail(), subject, html, plain);
+                    System.out.println("✅ Customer confirmation email sent successfully");
+                } catch (Exception emailError) {
+                    System.err.println("⚠️ Failed to send customer confirmation email (message still saved): " + emailError.getMessage());
+                    emailError.printStackTrace();
+                }
+            } else {
+                System.out.println("ℹ️ No customer email provided - skipping customer notification");
+            }
+
+            // 2) Admin notification - don't fail if this fails
+            try {
+                String adminSubject = "New Contact Message from " + (message.getName() == null ? "Unknown" : message.getName());
+                String adminPlain = buildAdminText(message);
+                String adminHtml = buildAdminHtml(message);
+                emailService.notifyAdmin(adminSubject, adminHtml, adminPlain);
+                System.out.println("✅ Admin notification email sent successfully");
+            } catch (Exception adminEmailError) {
+                System.err.println("⚠️ Failed to send admin notification email (message still saved): " + adminEmailError.getMessage());
+                adminEmailError.printStackTrace();
+            }
+
+            System.out.println("=== CONTACT MESSAGE NOTIFICATIONS COMPLETED ===");
+
+        } catch (Exception e) {
+            System.err.println("❌ Critical error in contact notifications: " + e.getMessage());
+            e.printStackTrace();
+            // Don't rethrow - message should still be saved even if emails fail
+        }
     }
 
     // other methods (getAll, getById, delete) remain unchanged

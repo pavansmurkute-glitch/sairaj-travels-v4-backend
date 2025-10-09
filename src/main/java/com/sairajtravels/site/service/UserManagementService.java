@@ -85,14 +85,16 @@ public class UserManagementService {
             user.setPassword(passwordEncoder.encode(tempPassword));
             user.setMustChangePassword(true);
             
-            // Send email with temporary password
-            try {
-                emailService.sendTemporaryPassword(user.getEmail(), user.getFullName(), 
-                                                 user.getUsername(), tempPassword);
-            } catch (Exception e) {
-                // Log error but don't fail user creation
-                System.err.println("Failed to send temporary password email: " + e.getMessage());
-            }
+        // Send email with temporary password (non-blocking)
+        try {
+            emailService.sendTemporaryPassword(user.getEmail(), user.getFullName(), 
+                                             user.getUsername(), tempPassword);
+            System.out.println("✅ Temporary password email sent for user: " + user.getUsername());
+        } catch (Exception e) {
+            // Log error but don't fail user creation
+            System.err.println("⚠️ Failed to send temporary password email (user still created): " + e.getMessage());
+            e.printStackTrace();
+        }
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -208,11 +210,15 @@ public class UserManagementService {
         PasswordResetToken resetToken = new PasswordResetToken(user, token, expiresAt);
         tokenRepository.save(resetToken);
         
-        // Send reset email
+        // Send reset email (non-blocking)
         try {
             emailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), token);
+            System.out.println("✅ Password reset email sent for user: " + user.getEmail());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to send password reset email: " + e.getMessage());
+            System.err.println("⚠️ Failed to send password reset email: " + e.getMessage());
+            e.printStackTrace();
+            // Don't throw exception - just log the reset token for manual sending
+            System.err.println("Manual reset token for " + user.getEmail() + ": " + token);
         }
         
         return token;
