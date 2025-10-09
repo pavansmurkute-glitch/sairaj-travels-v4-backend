@@ -297,7 +297,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             
             helper.setFrom(getFromEmail());
-            helper.setTo(fromEmail); // Send to admin email
+            helper.setTo(getFromEmail()); // Send to admin email
             helper.setSubject("Admin Notification: " + subject);
             helper.setText(fallbackText, htmlContent);
             
