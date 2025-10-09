@@ -11,11 +11,14 @@ public class EmailTestController {
 
     private final EmailService emailService;
     private final String fromAddress;
+    private final com.sairajtravels.site.service.EmailSettingsService emailSettingsService;
 
     public EmailTestController(EmailService emailService,
-                              @Value("${app.notification.from:${spring.mail.username}}") String fromAddress) {
+                              @Value("${app.notification.from:${spring.mail.username}}") String fromAddress,
+                              com.sairajtravels.site.service.EmailSettingsService emailSettingsService) {
         this.emailService = emailService;
         this.fromAddress = fromAddress;
+        this.emailSettingsService = emailSettingsService;
     }
 
     @PostMapping("/email")
@@ -99,15 +102,16 @@ public class EmailTestController {
     @GetMapping("/test-hardcoded-email")
     public ResponseEntity<String> testHardcodedEmail() {
         try {
-            System.out.println("=== HARDCODED EMAIL TEST WITH DIRECT CONFIGURATION ===");
+            System.out.println("=== HARDCODED EMAIL TEST WITH DATABASE CONFIGURATION ===");
             System.out.println("Timestamp: " + java.time.LocalDateTime.now());
             
-            // Hardcoded SendGrid configuration for testing
-            String hardcodedHost = "smtp.sendgrid.net";
-            String hardcodedPort = "2525"; // Using port 2525 as requested
-            String hardcodedUsername = "apikey";
-            String hardcodedPassword = System.getenv("SENDGRID_API_KEY"); // Get from environment
-            String hardcodedFromEmail = "PavansMurkute@gmail.com";
+            // Get configuration from database
+            com.sairajtravels.site.entity.EmailSettings settings = emailSettingsService.getEmailConfiguration();
+            String hardcodedHost = settings.getSmtpHost();
+            String hardcodedPort = settings.getSmtpPort().toString();
+            String hardcodedUsername = settings.getSmtpUsername();
+            String hardcodedPassword = settings.getSmtpPassword(); // Get from database
+            String hardcodedFromEmail = settings.getFromEmail();
             
             System.out.println("Hardcoded Configuration:");
             System.out.println("  Host: " + hardcodedHost);
