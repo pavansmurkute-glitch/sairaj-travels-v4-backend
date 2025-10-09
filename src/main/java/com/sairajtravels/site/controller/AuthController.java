@@ -3,6 +3,7 @@ package com.sairajtravels.site.controller;
 import com.sairajtravels.site.dto.LoginRequest;
 import com.sairajtravels.site.dto.LoginResponse;
 import com.sairajtravels.site.service.CustomUserDetailsService;
+import com.sairajtravels.site.service.UserManagementService;
 import com.sairajtravels.site.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserManagementService userManagementService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -74,6 +78,67 @@ public class AuthController {
         // In a stateless JWT implementation, logout is handled client-side
         // by removing the token from storage
         return ResponseEntity.ok(createSuccessResponse("Logout successful"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Email is required"));
+            }
+
+            // Create password reset token and send email
+            String token = userManagementService.createPasswordResetToken(email);
+            
+            return ResponseEntity.ok(createSuccessResponse(
+                "Password reset link has been sent to your email address. Please check your inbox."
+            ));
+        } catch (Exception e) {
+            // Don't reveal if user exists or not for security
+            return ResponseEntity.ok(createSuccessResponse(
+                "If the email address exists in our system, you will receive a password reset link."
+            ));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            String newPassword = request.get("newPassword");
+
+            if (token == null || newPassword == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Token and new password are required"));
+            }
+
+            if (newPassword.length() < 6) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Password must be at least 6 characters long"));
+            }
+
+            boolean success = userManagementService.resetPasswordWithToken(token, newPassword);
+            if (success) {
+                return ResponseEntity.ok(createSuccessResponse("Password has been reset successfully. You can now login with your new password."));
+            } else {
+                return ResponseEntity.badRequest().body(createErrorResponse("Invalid or expired reset token"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse("Failed to reset password: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/validate-reset-token")
+    public ResponseEntity<?> validateResetToken(@RequestParam String token) {
+        try {
+            boolean valid = userManagementService.validateResetToken(token);
+            if (valid) {
+                return ResponseEntity.ok(createSuccessResponse("Token is valid"));
+            } else {
+                return ResponseEntity.badRequest().body(createErrorResponse("Invalid or expired reset token"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse("Token validation failed: " + e.getMessage()));
+        }
     }
 
     private Map<String, Object> createErrorResponse(String message) {
