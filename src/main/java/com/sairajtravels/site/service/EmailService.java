@@ -24,6 +24,8 @@ public class EmailService {
     @Autowired
     private EmailSettingsService emailSettingsService;
     
+    private volatile boolean isInitialized = false;
+    
     @Value("${spring.mail.username:admin@sairajtravels.com}")
     private String defaultFromEmail;
     
@@ -56,16 +58,32 @@ public class EmailService {
      * Create a JavaMailSender configured with database settings
      */
     private JavaMailSender createConfiguredMailSender() {
+        // Use default mail sender during startup to avoid initialization issues
+        if (!isInitialized) {
+            System.out.println("📧 EmailService not yet initialized, using default mail sender");
+            return mailSender;
+        }
+        
         try {
             EmailSettings settings = emailSettingsService.getEmailConfiguration();
             
-            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-            mailSender.setHost(settings.getSmtpHost());
-            mailSender.setPort(settings.getSmtpPort());
-            mailSender.setUsername(settings.getSmtpUsername());
-            mailSender.setPassword(settings.getSmtpPassword());
+            if (settings == null) {
+                System.err.println("⚠️ EmailSettings is null, using default mail sender");
+                return mailSender;
+            }
             
-            Properties props = mailSender.getJavaMailProperties();
+            if (settings.getSmtpHost() == null || settings.getSmtpHost().trim().isEmpty()) {
+                System.err.println("⚠️ SMTP Host is null or empty, using default mail sender");
+                return mailSender;
+            }
+            
+            JavaMailSenderImpl configuredMailSender = new JavaMailSenderImpl();
+            configuredMailSender.setHost(settings.getSmtpHost());
+            configuredMailSender.setPort(settings.getSmtpPort() != null ? settings.getSmtpPort() : 587);
+            configuredMailSender.setUsername(settings.getSmtpUsername());
+            configuredMailSender.setPassword(settings.getSmtpPassword());
+            
+            Properties props = configuredMailSender.getJavaMailProperties();
             props.put("mail.transport.protocol", "smtp");
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
@@ -82,10 +100,27 @@ public class EmailService {
             System.out.println("  Username: " + settings.getSmtpUsername());
             System.out.println("  From: " + settings.getFromEmail());
             
-            return mailSender;
+            return configuredMailSender;
         } catch (Exception e) {
-            System.err.println("Error creating configured mail sender, using default: " + e.getMessage());
+            System.err.println("❌ Error creating configured mail sender, using default: " + e.getMessage());
+            e.printStackTrace();
             return mailSender; // Fall back to injected mailSender
+        }
+    }
+    
+    /**
+     * Initialize the EmailService after application startup
+     */
+    @jakarta.annotation.PostConstruct
+    public void initialize() {
+        try {
+            // Test database connection and email settings
+            emailSettingsService.getEmailConfiguration();
+            isInitialized = true;
+            System.out.println("✅ EmailService initialized successfully");
+        } catch (Exception e) {
+            System.err.println("⚠️ EmailService initialization failed, using defaults: " + e.getMessage());
+            isInitialized = false;
         }
     }
     
