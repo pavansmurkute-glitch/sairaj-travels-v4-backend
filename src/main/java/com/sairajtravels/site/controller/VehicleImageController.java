@@ -32,6 +32,13 @@ public class VehicleImageController {
         return vehicleImageService.createImage(dto);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<VehicleImageDTO> updateImage(@PathVariable Integer id,
+                                                     @RequestBody VehicleImageDTO dto) {
+        VehicleImageDTO updated = vehicleImageService.updateImage(id, dto);
+        return (updated != null) ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteImage(@PathVariable Integer id) {
         vehicleImageService.deleteImage(id);

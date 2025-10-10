@@ -61,6 +61,15 @@ public class VehicleImageService {
         return convertToDTO(saved);
     }
 
+    public VehicleImageDTO updateImage(Integer id, VehicleImageDTO dto) {
+        if (vehicleImageRepository.existsById(id)) {
+            dto.setImageId(id);
+            VehicleImage updated = vehicleImageRepository.save(convertToEntity(dto));
+            return convertToDTO(updated);
+        }
+        return null;
+    }
+
     public void deleteImage(Integer imageId) {
         vehicleImageRepository.deleteById(imageId);
     }
