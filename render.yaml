@@ -8,7 +8,8 @@ services:
     branch: main
     rootDir: .
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /actuator/health
+    healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: APP_FRONTEND_URL
         value: https://sairaj-travels-v4-frontend.onrender.com
@@ -23,7 +24,7 @@ services:
       - key: ORS_API_KEY
         value: eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjJjMzhhNDdiNTE4ZjQ4M2U5MGMwZmIwNmQ2ZTViYTg3IiwiaCI6Im11cm11cjY0In0=
       - key: SERVER_PORT
-        value: 10000
+        value: 8080
       - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
         value: com.microsoft.sqlserver.jdbc.SQLServerDriver
       - key: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
@@ -72,8 +73,6 @@ services:
         value: PavansMurkute@gmail.com
       - key: EMAIL_SERVICE_ENABLED
         value: true
-      - key: SPRING_PROFILES_ACTIVE
-        value: prod
       - key: SPRING_SERVLET_MULTIPART_ENABLED
         value: true
       - key: SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE
@@ -88,3 +87,9 @@ services:
         value: https://sairaj-travels-v4-frontend.onrender.com
       - key: APP_FRONTEND_URL
         value: https://sairaj-travels-v4-frontend.onrender.com
+      - key: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+        value: health,info
+      - key: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+        value: when-authorized
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod

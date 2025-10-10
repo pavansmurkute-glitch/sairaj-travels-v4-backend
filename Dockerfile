@@ -22,5 +22,5 @@ RUN mvn clean package -DskipTests
 # Expose port
 EXPOSE 8080
 
-# Run the application
-CMD ["java", "-jar", "target/sairaj-travels-backend-0.0.1-SNAPSHOT.jar"]
+# Run the application with proper JVM settings
+CMD ["java", "-Xmx512m", "-Xms256m", "-Djava.security.egd=file:/dev/./urandom", "-jar", "target/sairaj-travels-backend-0.0.1-SNAPSHOT.jar"]
