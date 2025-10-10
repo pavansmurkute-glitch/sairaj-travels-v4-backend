@@ -95,7 +95,8 @@ public class PackageService {
         return convertToDTO(savedPackage);
     }
 
-    // Update package
+    // Update package - clear cache
+    @CacheEvict(value = "packages", allEntries = true)
     public PackageDTO updatePackage(Integer packageId, PackageDTO packageDTO) {
         Optional<TravelPackage> packageOpt = packageRepository.findById(packageId);
         if (packageOpt.isPresent()) {
@@ -107,7 +108,8 @@ public class PackageService {
         return null;
     }
 
-    // Delete package (soft delete)
+    // Delete package (soft delete) - clear cache
+    @CacheEvict(value = "packages", allEntries = true)
     public boolean deletePackage(Integer packageId) {
         Optional<TravelPackage> packageOpt = packageRepository.findById(packageId);
         if (packageOpt.isPresent()) {
