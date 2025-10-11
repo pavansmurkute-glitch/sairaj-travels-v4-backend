@@ -11,8 +11,11 @@ import java.util.List;
 @Repository
 public interface PackageRepository extends JpaRepository<TravelPackage, Integer> {
     
-    // Find all active packages
-    List<TravelPackage> findByIsActiveTrueOrderBySortOrderAsc();
+    // Find all active packages - prioritize featured packages, then by sort order
+    @Query("SELECT p FROM TravelPackage p WHERE p.isActive = true ORDER BY " +
+           "CASE WHEN p.isFeatured = true THEN 0 ELSE 1 END, " +
+           "p.sortOrder ASC, p.packageId ASC")
+    List<TravelPackage> findByIsActiveTrueOrderByFeaturedAndSortOrder();
     
     // Find packages by category
     List<TravelPackage> findByPackageCategoryIdAndIsActiveTrueOrderBySortOrderAsc(String categoryId);

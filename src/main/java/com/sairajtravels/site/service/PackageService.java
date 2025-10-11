@@ -31,7 +31,7 @@ public class PackageService {
     // Get all active packages (for public use) - with caching
     @Cacheable(value = "packages", key = "'active'")
     public List<PackageDTO> getAllPackages() {
-        List<TravelPackage> packages = packageRepository.findByIsActiveTrueOrderBySortOrderAsc();
+        List<TravelPackage> packages = packageRepository.findByIsActiveTrueOrderByFeaturedAndSortOrder();
         return packages.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
