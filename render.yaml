@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sairaj-travels-v4-backend
+    name: sairaj-travels-v5-backend
     env: docker
     region: singapore
     plan: free
@@ -12,7 +12,7 @@ services:
     autoDeploy: true
     envVars:
       - key: APP_FRONTEND_URL
-        value: https://sairaj-travels-v4-frontend.onrender.com
+        value: https://sairaj-travels-v5-frontend.onrender.com
       - key: LOGGING_LEVEL_COM_SAIRAJTRAVELS_SITE
         value: INFO
       - key: LOGGING_LEVEL_ORG_HIBERNATE_SQL
@@ -84,9 +84,9 @@ services:
       - key: JAVA_OPTS
         value: -Djavax.net.ssl.trustStoreType=JKS -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Dcom.microsoft.sqlserver.jdbc.SSLProtocol=TLSv1.2
       - key: APP_CORS_ALLOWED_ORIGINS
-        value: https://sairaj-travels-v4-frontend.onrender.com
+        value: https://sairaj-travels-v5-frontend.onrender.com
       - key: APP_FRONTEND_URL
-        value: https://sairaj-travels-v4-frontend.onrender.com
+        value: https://sairaj-travels-v5-frontend.onrender.com
       - key: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
         value: health,info
       - key: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
