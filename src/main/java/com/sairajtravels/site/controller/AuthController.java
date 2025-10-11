@@ -59,7 +59,7 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponse(token, "Login successful"));
     }
 
-    @PostMapping("/admin/auth/login-enhanced")
+    @PostMapping("/admin/login-enhanced")
     public ResponseEntity<?> loginEnhanced(@RequestBody LoginRequest loginRequest) {
         try {
             // Authenticate using the enhanced user management system
