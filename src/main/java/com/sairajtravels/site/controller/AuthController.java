@@ -2,6 +2,7 @@ package com.sairajtravels.site.controller;
 
 import com.sairajtravels.site.dto.LoginRequest;
 import com.sairajtravels.site.dto.LoginResponse;
+import com.sairajtravels.site.entity.AdminUser;
 import com.sairajtravels.site.service.CustomUserDetailsService;
 import com.sairajtravels.site.service.UserManagementService;
 import com.sairajtravels.site.util.JwtUtil;
@@ -56,6 +57,48 @@ public class AuthController {
         extraClaims.put("authorities", userDetails.getAuthorities());
 
         return ResponseEntity.ok(new LoginResponse(token, "Login successful"));
+    }
+
+    @PostMapping("/admin/auth/login-enhanced")
+    public ResponseEntity<?> loginEnhanced(@RequestBody LoginRequest loginRequest) {
+        try {
+            // Authenticate using the enhanced user management system
+            AdminUser adminUser = userManagementService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
+            
+            if (adminUser == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Invalid username or password"));
+            }
+
+            // Generate JWT token
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            final String token = jwtUtil.generateToken(userDetails);
+
+            // Create enhanced response with user details
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("token", token);
+            response.put("message", "Login successful");
+            
+            // Include user details
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("id", adminUser.getId());
+            userInfo.put("username", adminUser.getUsername());
+            userInfo.put("email", adminUser.getEmail());
+            userInfo.put("fullName", adminUser.getFullName());
+            userInfo.put("role", adminUser.getRole());
+            userInfo.put("mustChangePassword", adminUser.getMustChangePassword());
+            userInfo.put("isActive", adminUser.getIsActive());
+            userInfo.put("lastLogin", adminUser.getLastLogin());
+            
+            response.put("user", userInfo);
+
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(createErrorResponse("Login failed"));
+        }
     }
 
     @PostMapping("/validate")
