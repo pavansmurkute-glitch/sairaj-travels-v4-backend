@@ -25,8 +25,9 @@ public class CorsConfig {
                 
                 registry.addMapping("/api/**")
                         .allowedOrigins(origins)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(false);
                         // Removed allowCredentials to fix CORS error with wildcard origins
                         // .allowCredentials(true);
             }
