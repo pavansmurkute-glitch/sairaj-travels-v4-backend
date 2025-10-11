@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TestimonialRepository extends JpaRepository<Testimonial, Long> {
+public interface TestimonialRepository extends JpaRepository<Testimonial, Integer> {
     
     // Find all active testimonials ordered by sort order
     @Query("SELECT t FROM Testimonial t WHERE t.isActive = true ORDER BY t.sortOrder ASC, t.createdAt ASC")

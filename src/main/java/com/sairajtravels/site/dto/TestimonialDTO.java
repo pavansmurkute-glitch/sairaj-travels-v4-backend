@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class TestimonialDTO {
     
-    private Long id;
+    private Integer id;
     private String customerName;
     private String customerType;
     private String testimonialText;
@@ -18,7 +18,7 @@ public class TestimonialDTO {
     // Constructors
     public TestimonialDTO() {}
     
-    public TestimonialDTO(Long id, String customerName, String customerType, String testimonialText, 
+    public TestimonialDTO(Integer id, String customerName, String customerType, String testimonialText, 
                          Integer rating, String avatarLetter, Boolean isActive, Integer sortOrder) {
         this.id = id;
         this.customerName = customerName;
@@ -31,11 +31,11 @@ public class TestimonialDTO {
     }
     
     // Getters and Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     

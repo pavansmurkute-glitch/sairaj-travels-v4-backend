@@ -35,7 +35,7 @@ public class TestimonialService {
     }
     
     // Get testimonial by ID
-    public Optional<TestimonialDTO> getTestimonialById(Long id) {
+    public Optional<TestimonialDTO> getTestimonialById(Integer id) {
         return repository.findById(id)
                 .map(this::convertToDTO);
     }
@@ -48,7 +48,7 @@ public class TestimonialService {
     }
     
     // Update existing testimonial
-    public Optional<TestimonialDTO> updateTestimonial(Long id, TestimonialDTO dto) {
+    public Optional<TestimonialDTO> updateTestimonial(Integer id, TestimonialDTO dto) {
         return repository.findById(id)
                 .map(existing -> {
                     existing.setCustomerName(dto.getCustomerName());
@@ -64,7 +64,7 @@ public class TestimonialService {
     }
     
     // Delete testimonial
-    public boolean deleteTestimonial(Long id) {
+    public boolean deleteTestimonial(Integer id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return true;
@@ -73,7 +73,7 @@ public class TestimonialService {
     }
     
     // Toggle testimonial active status
-    public Optional<TestimonialDTO> toggleActiveStatus(Long id) {
+    public Optional<TestimonialDTO> toggleActiveStatus(Integer id) {
         return repository.findById(id)
                 .map(testimonial -> {
                     testimonial.setIsActive(!testimonial.getIsActive());

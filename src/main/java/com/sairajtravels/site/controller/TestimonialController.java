@@ -44,7 +44,7 @@ public class TestimonialController {
     
     // Get testimonial by ID
     @GetMapping("/{id}")
-    public ResponseEntity<TestimonialDTO> getTestimonialById(@PathVariable Long id) {
+    public ResponseEntity<TestimonialDTO> getTestimonialById(@PathVariable Integer id) {
         try {
             Optional<TestimonialDTO> testimonial = service.getTestimonialById(id);
             return testimonial.map(ResponseEntity::ok)
@@ -67,7 +67,7 @@ public class TestimonialController {
     
     // Update existing testimonial
     @PutMapping("/{id}")
-    public ResponseEntity<TestimonialDTO> updateTestimonial(@PathVariable Long id, @RequestBody TestimonialDTO testimonial) {
+    public ResponseEntity<TestimonialDTO> updateTestimonial(@PathVariable Integer id, @RequestBody TestimonialDTO testimonial) {
         try {
             Optional<TestimonialDTO> updated = service.updateTestimonial(id, testimonial);
             return updated.map(ResponseEntity::ok)
@@ -79,7 +79,7 @@ public class TestimonialController {
     
     // Delete testimonial
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTestimonial(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTestimonial(@PathVariable Integer id) {
         try {
             boolean deleted = service.deleteTestimonial(id);
             return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
@@ -90,7 +90,7 @@ public class TestimonialController {
     
     // Toggle testimonial active status
     @PatchMapping("/{id}/toggle")
-    public ResponseEntity<TestimonialDTO> toggleActiveStatus(@PathVariable Long id) {
+    public ResponseEntity<TestimonialDTO> toggleActiveStatus(@PathVariable Integer id) {
         try {
             Optional<TestimonialDTO> updated = service.toggleActiveStatus(id);
             return updated.map(ResponseEntity::ok)
